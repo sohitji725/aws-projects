@@ -1,14 +1,26 @@
-Project- Highly Available and Secure AWS VPC Architecture for Production Workloads
+# Fortified Server Network Infrastructure — AWS
 
-Hands-on production deployment — VPC, public/private subnets, NAT, bastion, Auto Scaling, ALB, target groups, NACLs & Security Groups**
+**Hands-on production deployment — VPC, public/private subnets, NAT, bastion, Auto Scaling, ALB, target groups, NACLs & Security Groups**
+
+---
+
+## Project summary
+
+This project implements a production-grade AWS network and compute architecture: a custom VPC with public and private subnets across two AZs, a bastion host for secure admin access, Auto Scaling group for application instances in private subnets, a public Application Load Balancer (ALB) to serve traffic, NAT Gateways for outbound internet access, and layered security using Security Groups and Network ACLs.
 
 
+<img width="864" height="678" alt="architecture" src="https://github.com/user-attachments/assets/3257b66e-bce0-4c8f-adef-52ffabfda320" />
+<img width="1920" height="971" alt="vpc" src="https://github.com/user-attachments/assets/ebe76813-0e1e-4d08-9eb9-6dc90abe233c" />
+<img width="1920" height="967" alt="nacl" src="https://github.com/user-attachments/assets/1c85f6aa-cd8f-4611-82e9-8fef52d56d0c" />
+<img width="1920" height="971" alt="sg" src="https://github.com/user-attachments/assets/c3610536-9407-45e6-9ca6-f1bf9a51891f" />
+<img width="1920" height="974" alt="Screenshot (90)" src="https://github.com/user-attachments/assets/2b47a433-2db1-4cd0-8b57-d652b2a905a2" />
+<img width="1920" height="981" alt="Screenshot (89)" src="https://github.com/user-attachments/assets/0daaa819-1bed-49b3-ad40-26078ccecf87" />
+<img width="1920" height="981" alt="Screenshot (94)" src="https://github.com/user-attachments/assets/7d3eb3ae-c3a6-459a-87b9-0fdf05fbed8c" />
 
-Project summary
 
-This project implements a production-grade AWS network and compute architecture: a custom VPC with public and private subnets across two AZs, a bastion host for secure admin access, Auto Scaling group for application instances in private subnets, a public Application Load Balancer (ALB) to serve traffic, NAT Gateways for outbound internet access, and layered security using Security Groups and Network ACLs. 
-                                           
-Architecture (high level)
+---
+
+## Architecture (high level)
 
 * **VPC**: `10.0.0.0/16` (example)
 * **Public subnets** (2 AZs): ALB, NAT Gateway(s), Bastion Host
@@ -25,11 +37,8 @@ Architecture (high level)
 
 ---
 
-## Files / artifacts to add later
 
-* `diagram-architecture.png` — visual network diagram (public/private subnets, ALB, NAT, bastion).
-* `screenshots/sg-nacl-rules.png` — screenshots of Security Group and NACL configs.
-* `terraform/` or `cloudformation/` — (optional) infra-as-code for automation.
+
 
 ---
 
@@ -221,11 +230,37 @@ sudo systemctl restart nginx
 * Demonstrated ALB health-check behavior.
 
 ---
+ Perfect — you’ve done almost a **real production-level setup**, not just a demo. Let’s summarize and write your final “**What I Learned**” section in a way that reflects your full understanding and practical work.
 
-## What I learned (concepts in 1–2 lines)
+Here’s a complete version you can put in your README or project report:
 
-* **Security Groups are stateful and per-instance; NACLs are stateless and per-subnet — order matters for NACLs.**
-* **ALB listeners accept public traffic and forward to target group ports on private instances; keep instance ports restricted to ALB SG.**
+---
+
+### 🧠 What I Learned
+
+This project helped me understand how to deploy and manage an **application in a secure AWS VPC architecture** using both **public and private subnets**. I went beyond just a basic hands-on setup and focused on a **production-like environment**.
+
+Key takeaways:
+
+* **VPC Networking:** Created a custom VPC with public and private subnets, attached an Internet Gateway, and configured proper routing so public and private instances could communicate securely.
+* **Bastion Host Access:** Learned how to connect to private instances through a bastion (jump) host by securely transferring key pairs using `scp` and then SSH’ing from the bastion into the private EC2 instance.
+* **File Transfer & Permissions:** Understood the `scp` command deeply — how to copy files between local and remote machines, and how permissions (`chmod 400`) affect SSH key access.
+* **Application Hosting:**
+
+  * Used **Python HTTP Server** to host an `index.html` file inside the private instance.
+  * Observed how the private server could respond to traffic coming through a Load Balancer.
+  * Learned that if the Load Balancer listens on port 80 while the app runs on 8000, the listener must map correctly or the Security Group must open port 80 to make it accessible.
+* **Production Readiness:**
+
+  * Understood why production setups usually use **Nginx** or a reverse proxy in front of application servers.
+  * Learned how to configure listeners and target groups in a Load Balancer to match the actual app port.
+  * Ensured security by restricting SSH and HTTP access using Security Groups instead of opening all ports.
+* **Real AWS Flow:**
+  Practically saw how traffic flows — from the **internet → Load Balancer → Bastion Host → Private Instance → Application Server** — and how every step affects connectivity and security.
+
+---
+
+
 
 ---
 
@@ -245,50 +280,7 @@ sudo systemctl restart nginx
 * SSH works but `scp` permission denied → copy to `~` or `/tmp`, then `sudo mv` if needed; ensure `chmod 400` on keys.
 * If you copied the key to bastion and can’t SSH private instance, ensure key permissions on bastion and on private are `chmod 400`.
 
----
 
-## Next steps / Improvements
 
-* Replace manual server setup with **AMI bake** or Docker + ECS/EKS.
-* Add HTTPS (ACM certificate + ALB listener on 443, redirect 80 → 443).
-* Implement Auto Scaling policies (CPU-based, request-based).
-* Add monitoring & alerting (CloudWatch metrics, ALB target health alarms).
-* Convert to Infra-as-code (Terraform) and CI/CD for deployments.
 
----
-
-## Author
-
-**Sohit Sahu** — DevOps & Cloud Engineering practice
-**Date:** November 2025
-
----
-
-#### Placeholders for images (add after creating screenshots)
-
-* `![Architecture diagram](./images/architecture.png)`
-* `![Security Group rules](./images/sg-rules.png)`
-* `![NACL rules](./images/nacl-rules.png)`
-
----
-
-If you want, I can:
-
-* update the README to include the **exact commands** you used (I can insert your IPs/paths), or
-* add an extra section showing a sample **agent-forwarding SSH config** (`~/.ssh/config`) so you never copy keys to bastion. Which do you prefer? 🧠 What I Learned
-This project helped me understand how to deploy and manage an application in a secure AWS VPC architecture using both public and private subnets. I went beyond just a basic hands-on setup and focused on a production-like environment.
-Key takeaways:
-•	VPC Networking: Created a custom VPC with public and private subnets, attached an Internet Gateway, and configured proper routing so public and private instances could communicate securely.
-•	Bastion Host Access: Learned how to connect to private instances through a bastion (jump) host by securely transferring key pairs using scp and then SSH’ing from the bastion into the private EC2 instance.
-•	File Transfer & Permissions: Understood the scp command deeply — how to copy files between local and remote machines, and how permissions (chmod 400) affect SSH key access.
-•	Application Hosting:
-o	Used Python HTTP Server to host an index.html file inside the private instance.
-o	Observed how the private server could respond to traffic coming through a Load Balancer.
-o	Learned that if the Load Balancer listens on port 80 while the app runs on 8000, the listener must map correctly or the Security Group must open port 80 to make it accessible.
-•	Production Readiness:
-o	Understood why production setups usually use Nginx or a reverse proxy in front of application servers.
-o	Learned how to configure listeners and target groups in a Load Balancer to match the actual app port.
-o	Ensured security by restricting SSH and HTTP access using Security Groups instead of opening all ports.
-•	Real AWS Flow:
-Practically saw how traffic flows — from the internet → Load Balancer → Bastion Host → Private Instance → Application Server — and how every step affects connectivity and security.
 
