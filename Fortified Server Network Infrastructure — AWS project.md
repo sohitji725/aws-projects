@@ -125,30 +125,6 @@ chmod 400 ~/login-aws.pem
 
 ---
 
-### 6. (Optional, recommended) Use SSH agent forwarding (no key copy)
-
-Instead of copying your private key onto the bastion, enable agent forwarding from your laptop. This keeps the key only on your local machine:
-
-1. Start ssh-agent locally and add the key:
-
-```bash
-eval "$(ssh-agent -s)"
-ssh-add ~/Downloads/login-aws.pem
-```
-
-2. Connect to bastion with agent forwarding:
-
-```bash
-ssh -A ubuntu@<BASTION_PUBLIC_IP>
-```
-
-3. From the bastion, SSH to the private instance normally:
-
-```bash
-ssh ubuntu@10.x.x.x
-```
-
-Agent forwarding allows the bastion to forward authentication to the private host without storing the private key on the bastion.
 
 ---
 
@@ -202,9 +178,7 @@ sudo systemctl restart nginx
 * **Instance SG**: inbound `8000` only from ALB SG (use security-group source); SSH inbound only from Bastion SG or admin IP.
 * **NACLs**: subnet-level allow/deny rules — ensure they do not block ALB listeners or SSH. Do not rely on NACLs alone for instance security.
 
-> Note: You requested to remove the ephemeral-range instruction — this README omits explicit ephemeral-port outbound rules (only ensure your NACLs allow legitimate return traffic for your setup).
 
----
 
 ### 11. Testing & verification
 
@@ -229,12 +203,7 @@ sudo systemctl restart nginx
 * Tested security: Security Groups & NACLs behavior.
 * Demonstrated ALB health-check behavior.
 
----
- Perfect — you’ve done almost a **real production-level setup**, not just a demo. Let’s summarize and write your final “**What I Learned**” section in a way that reflects your full understanding and practical work.
-
-Here’s a complete version you can put in your README or project report:
-
----
+=
 
 ### 🧠 What I Learned
 
@@ -247,7 +216,7 @@ Key takeaways:
 * **File Transfer & Permissions:** Understood the `scp` command deeply — how to copy files between local and remote machines, and how permissions (`chmod 400`) affect SSH key access.
 * **Application Hosting:**
 
-  * Used **Python HTTP Server** to host an `index.html` file inside the private instance.
+  * Used **Nginx HTTP Server** to host an `index.html` file inside the private instance.
   * Observed how the private server could respond to traffic coming through a Load Balancer.
   * Learned that if the Load Balancer listens on port 80 while the app runs on 8000, the listener must map correctly or the Security Group must open port 80 to make it accessible.
 * **Production Readiness:**
