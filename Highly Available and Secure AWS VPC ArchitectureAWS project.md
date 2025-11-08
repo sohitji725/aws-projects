@@ -1,4 +1,4 @@
-# Fortified Server Network Infrastructure — AWS
+# Highly Available and Secure AWS VPC Architecture — AWS
 
 **Hands-on production deployment — VPC, public/private subnets, NAT, bastion, Auto Scaling, ALB, target groups, NACLs & Security Groups**
 
